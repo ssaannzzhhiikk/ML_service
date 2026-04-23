@@ -1,62 +1,84 @@
-# ML FastAPI Docker
+Here's your updated README:
 
-A simple Iris classification model served via FastAPI and containerized with Docker.
+---
+
+# ML FastAPI Docker — Full ML Pipeline
+
+A complete ML system with Iris classification, featuring FastAPI backend, Streamlit frontend, MLflow experiment tracking, and Docker containerization.
+
+## What's Included
+
+- **FastAPI** — REST API serving ML predictions
+- **Streamlit** — Interactive web UI for users
+- **MLflow** — Experiment tracking and model registry
+- **Docker Compose** — One-command deployment of all services
 
 ## Project Structure
 
 ```
 ML_service/
-├── main.py              # FastAPI (unchanged API, loads from MLflow Registry)
-├── train.py             # Training + MLflow tracking + model registry
+├── main.py              # FastAPI app (loads model from MLflow Registry)
+├── train.py             # Training script with MLflow tracking
 ├── frontend/
 │   └── app.py           # Streamlit UI
-├── Dockerfile           # FastAPI service
-├── Dockerfile.frontend  # Streamlit service
-├── docker-compose.yml   # Orchestrates everything + MLflow
-├── requirements.txt     # Updated deps
+├── Dockerfile           # FastAPI service image
+├── Dockerfile.frontend  # Streamlit service image
+├── docker-compose.yml   # Orchestrates API + frontend + MLflow
+├── requirements.txt     # Python dependencies
+├── model.joblib         # Trained model artifact
 └── README.md
 ```
 
-## Step 1 — Train the model
+## Prerequisites
+
+- Docker & Docker Compose
+- Python 3.11+ (for local training)
+
+## Step 1 — Train and register the model
+
+Start MLflow first (needed for model registration):
+
+```bash
+docker-compose up -d mlflow
+```
+
+Then train locally:
 
 ```bash
 pip install -r requirements.txt
 python train.py
 ```
 
-This creates `model.joblib`.
+This will:
+- Train a RandomForest classifier
+- Log hyperparameters, accuracy, and F1-score to MLflow
+- Register the model as `iris-rf-model` in the Model Registry
+- Save `model.joblib` locally
 
-## Step 2 — Run locally
+Verify in MLflow UI: `http://127.0.0.1:5001/`
 
-```bash
-uvicorn main:app --reload
-```
-
-Test endpoints:
-- `GET  http://localhost:8000/`          → health check
-- `POST http://localhost:8000/predict`   → prediction
-- `GET  http://localhost:8000/docs`      → Swagger UI
-
-Example request body for /predict:
-```json
-{
-  "sepal_length": 5.1,
-  "sepal_width": 3.5,
-  "petal_length": 1.4,
-  "petal_width": 0.2
-}
-```
-
-## Step 3 — Build Docker image
+## Step 2 — Launch full stack
 
 ```bash
-docker build -t ml-fastapi .
+docker-compose up --build -d
 ```
 
-## Step 4 — Run Docker container
+Services will be available at:
 
-```bash
-docker run -p 8000:8000 ml-fastapi
-```
+| Service | URL | Description |
+|---------|-----|-------------|
+| FastAPI | `http://127.0.0.1:8000/` | Health check |
+| FastAPI Docs | `http://127.0.0.1:8000/docs` | Swagger UI |
+| Streamlit | `http://127.0.0.1:8501/` | Web UI for predictions |
+| MLflow | `http://127.0.0.1:5001/` | Experiment tracking & registry |
 
-The same endpoints are now available from inside the container.
+> **Note:** On Windows with Docker Desktop, use `127.0.0.1` instead of `localhost`.
+
+## Tech Stack
+
+- Python 3.11
+- FastAPI + Uvicorn
+- Streamlit
+- scikit-learn
+- MLflow
+- Docker & Docker Compose
