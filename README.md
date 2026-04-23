@@ -5,12 +5,15 @@ A simple Iris classification model served via FastAPI and containerized with Doc
 ## Project Structure
 
 ```
-ml-fastapi-docker/
-├── main.py           # FastAPI application
-├── train.py          # Model training script
-├── model.joblib      # Saved model artifact
-├── requirements.txt  # Python dependencies
-├── Dockerfile        # Container instructions
+ML_service/
+├── main.py              # FastAPI (unchanged API, loads from MLflow Registry)
+├── train.py             # Training + MLflow tracking + model registry
+├── frontend/
+│   └── app.py           # Streamlit UI
+├── Dockerfile           # FastAPI service
+├── Dockerfile.frontend  # Streamlit service
+├── docker-compose.yml   # Orchestrates everything + MLflow
+├── requirements.txt     # Updated deps
 └── README.md
 ```
 

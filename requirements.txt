@@ -5,3 +5,6 @@ joblib
 numpy
 pandas
 pydantic
+mlflow
+streamlit
+requests
