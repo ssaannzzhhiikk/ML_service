@@ -2,7 +2,7 @@ import os
 import streamlit as st
 import requests
 
-# Берём из env (для Docker) или дефолт (для локального запуска)
+# Берём из env или дефолт
 API_URL = os.getenv("API_URL", "http://localhost:8000/predict")
 
 st.set_page_config(page_title="Iris Classifier", page_icon="🌸")
