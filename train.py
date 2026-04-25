@@ -50,7 +50,7 @@ with mlflow.start_run(run_name="rf_run_v1") as run:
     joblib.dump(model, "model.joblib")
     mlflow.log_artifact("model.joblib")
 
-    # Log model for Registry (ПРАВИЛЬНЫЙ СПОСОБ)
+    # Log model for Registry
     mlflow.sklearn.log_model(
         sk_model=model,
         artifact_path="model",
