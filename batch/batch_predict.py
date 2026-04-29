@@ -2,7 +2,7 @@ import joblib
 from db import SessionLocal, InputData, Prediction
 from datetime import datetime
 
-MODEL_PATH = "../model.joblib"
+MODEL_PATH = "model.joblib"
 
 
 def run_batch_prediction():
