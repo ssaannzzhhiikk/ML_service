@@ -1,0 +1,11 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements-batch.txt .
+RUN pip install --no-cache-dir -r requirements-batch.txt
+
+# Only copy batch-related files + model
+COPY batch_predict.py scheduler.py db.py init_db.py seed_data.py model.joblib ./
+
+CMD ["python", "scheduler.py"]

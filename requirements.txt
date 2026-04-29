@@ -8,3 +8,6 @@ pydantic
 mlflow
 streamlit
 requests
+sqlalchemy
+apscheduler
+psycopg2-binary
