@@ -1,31 +1,37 @@
-Here's your updated README:
-
----
 
 # ML FastAPI Docker — Full ML Pipeline
 
-A complete ML system with Iris classification, featuring FastAPI backend, Streamlit frontend, MLflow experiment tracking, and Docker containerization.
+A complete ML system with Iris classification, featuring FastAPI backend, Streamlit frontend, MLflow experiment tracking, **batch prediction pipeline**, and Docker containerization.
 
 ## What's Included
 
-- **FastAPI** — REST API serving ML predictions
+- **FastAPI** — REST API serving real-time ML predictions
 - **Streamlit** — Interactive web UI for users
 - **MLflow** — Experiment tracking and model registry
+- **Batch Prediction Pipeline** — Scheduled offline predictions with PostgreSQL
 - **Docker Compose** — One-command deployment of all services
 
 ## Project Structure
 
 ```
 ML_service/
-├── main.py              # FastAPI app (loads model from MLflow Registry)
-├── train.py             # Training script with MLflow tracking
+├── main.py                   # FastAPI app (loads model from MLflow Registry)
+├── train.py                  # Training script with MLflow tracking
 ├── frontend/
-│   └── app.py           # Streamlit UI
-├── Dockerfile           # FastAPI service image
-├── Dockerfile.frontend  # Streamlit service image
-├── docker-compose.yml   # Orchestrates API + frontend + MLflow
-├── requirements.txt     # Python dependencies
-├── model.joblib         # Trained model artifact
+│   └── app.py                # Streamlit UI
+├── db.py                     # SQLAlchemy models (input_data, predictions)
+├── init_db.py                # Create database tables
+├── seed_data.py              # Populate input_data with sample rows
+├── batch_predict.py          # Batch pipeline: read DB → predict → write DB
+├── scheduler.py              # APScheduler (runs batch every 5 minutes)
+├── Dockerfile.api            # FastAPI service image
+├── Dockerfile.batch          # Batch scheduler image
+├── Dockerfile.frontend       # Streamlit service image
+├── docker-compose.yml        # Orchestrates all services
+├── requirements-api.txt      # FastAPI dependencies
+├── requirements-batch.txt    # Batch pipeline dependencies
+├── requirements-frontend.txt # Streamlit dependencies
+├── model.joblib              # Trained model artifact
 └── README.md
 ```
 
@@ -45,7 +51,7 @@ docker-compose up -d mlflow
 Then train locally:
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-api.txt
 python train.py
 ```
 
@@ -74,6 +80,59 @@ Services will be available at:
 
 > **Note:** On Windows with Docker Desktop, use `127.0.0.1` instead of `localhost`.
 
+## Step 3 — Initialize batch prediction pipeline
+
+After the stack is running, create tables and seed input data:
+
+```bash
+# Create tables
+docker-compose run --rm batch python init_db.py
+
+# Insert sample input data
+docker-compose run --rm batch python seed_data.py
+```
+
+Run the batch pipeline manually once to verify:
+
+```bash
+docker-compose run --rm batch python batch_predict.py
+```
+
+You should see:
+```
+[2026-04-29 19:37:01] Processed 5 rows, new predictions: 5
+```
+
+Check predictions in the database:
+
+```bash
+docker-compose exec db psql -U mluser -d mlservice -c "SELECT * FROM predictions;"
+```
+
+The `batch` service is already running via `scheduler.py` and will automatically execute every **5 minutes**.
+
+View scheduler logs:
+
+```bash
+docker-compose logs -f batch
+```
+
+## Batch Prediction Pipeline (Practice 7)
+
+This module implements an automated batch prediction system:
+
+1. **Database** — PostgreSQL stores `input_data` (features) and `predictions` (results + timestamp)
+2. **Batch Script** — `batch_predict.py` connects to DB, loads `model.joblib`, generates predictions, and writes results back
+3. **Scheduling** — `scheduler.py` uses APScheduler to run the batch pipeline automatically every 5 minutes
+4. **Idempotency** — The script skips rows that already have predictions, preventing duplicates
+
+### Database Schema
+
+| Table | Columns |
+|-------|---------|
+| `input_data` | `id`, `sepal_length`, `sepal_width`, `petal_length`, `petal_width` |
+| `predictions` | `id`, `input_id`, `prediction`, `prediction_timestamp` |
+
 ## Tech Stack
 
 - Python 3.11
@@ -81,4 +140,6 @@ Services will be available at:
 - Streamlit
 - scikit-learn
 - MLflow
+- SQLAlchemy + PostgreSQL
+- APScheduler
 - Docker & Docker Compose
