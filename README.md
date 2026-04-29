@@ -15,24 +15,29 @@ A complete ML system with Iris classification, featuring FastAPI backend, Stream
 
 ```
 ML_service/
-├── main.py                   # FastAPI app (loads model from MLflow Registry)
-├── train.py                  # Training script with MLflow tracking
-├── frontend/
-│   └── app.py                # Streamlit UI
-├── db.py                     # SQLAlchemy models (input_data, predictions)
-├── init_db.py                # Create database tables
-├── seed_data.py              # Populate input_data with sample rows
-├── batch_predict.py          # Batch pipeline: read DB → predict → write DB
-├── scheduler.py              # APScheduler (runs batch every 5 minutes)
-├── Dockerfile.api            # FastAPI service image
-├── Dockerfile.batch          # Batch scheduler image
-├── Dockerfile.frontend       # Streamlit service image
+├── api/                      # FastAPI service
+│   ├── main.py               # REST API (loads model.joblib)
+│   ├── Dockerfile            # API container image
+│   └── requirements.txt      # FastAPI dependencies
+├── batch/                    # Batch prediction pipeline
+│   ├── batch_predict.py      # Read DB → predict → write DB
+│   ├── scheduler.py          # APScheduler (runs every 5 min)
+│   ├── db.py                 # SQLAlchemy models
+│   ├── init_db.py            # Create database tables
+│   ├── seed_data.py          # Populate input_data
+│   ├── Dockerfile            # Batch container image
+│   └── requirements.txt      # Batch dependencies
+├── frontend/                 # Streamlit UI
+│   ├── app.py                # Web interface
+│   ├── Dockerfile            # Frontend container image
+│   └── requirements.txt      # Streamlit dependencies
+├── ml/                       # Training & artifacts
+│   ├── train.py              # Training script with MLflow tracking
+│   └── model.joblib          # Trained model artifact
 ├── docker-compose.yml        # Orchestrates all services
-├── requirements-api.txt      # FastAPI dependencies
-├── requirements-batch.txt    # Batch pipeline dependencies
-├── requirements-frontend.txt # Streamlit dependencies
-├── model.joblib              # Trained model artifact
-└── README.md
+├── README.md
+├── .dockerignore
+└── .gitignore
 ```
 
 ## Prerequisites
