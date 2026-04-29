@@ -7,6 +7,5 @@ venv/
 data/
 mlflow_data/
 postgres_data/
-Dockerfile*
-docker-compose.yml
-*.md
+*.db
+.idea/

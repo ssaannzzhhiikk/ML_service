@@ -21,7 +21,7 @@ try:
     print(f"Loaded model: {model_uri}")
 except Exception as e:
     print(f"Registry load failed ({e}), falling back to local model.joblib")
-    model = joblib.load("model.joblib")
+    model = joblib.load("../model.joblib")
 
 LABELS = ["setosa", "versicolor", "virginica"]
 
